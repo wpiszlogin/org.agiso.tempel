@@ -27,6 +27,7 @@ import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.agiso.tempel.Temp;
 import org.agiso.tempel.api.ITemplateSource;
 import org.agiso.tempel.api.impl.FileTemplateSource;
 import org.agiso.tempel.test.AbstractTempelEngineTest;
@@ -37,7 +38,7 @@ import org.testng.annotations.Test;
 public class DirectoryExtenderEngineUTest extends AbstractTempelEngineTest {
 	@Test
 	public void testProcessDirectory1() throws Exception {
-		
+
 		System.out.println("Uruchamianie testu: testProcessDirectory1() ");
 		// Wypełnianie mapy modelu dla szablonu:
 		Map<String, Object> modelMap = new HashMap<String, Object>();
@@ -46,24 +47,24 @@ public class DirectoryExtenderEngineUTest extends AbstractTempelEngineTest {
 		modelMap.put("key_type", "int");
 		modelMap.put("key_field", "rate");
 		modelMap.put("key_upper_entity", "Film");
-		
+
 		// Ustalanie dodatkowych parametrów
 		String str = (String)modelMap.get("key_field");
 		modelMap.put("key_upper_field", Character.toUpperCase(str.charAt(0)) + str.substring(1));
 		str = (String)modelMap.get("key_upper_entity");
 		modelMap.put("key_entity", Character.toLowerCase(str.charAt(0)) + str.substring(1));
-		
+
 		// Przygotowywanie katalogu wyjściowego i uruchamianie sinika:
 		String outPath = getOutputPath(true);
 //		ITemplateSource templateSource = new FileTemplateSource(
 //				repositoryPath + "/DirectoryExtenderEngineUTest", "resources");
-		
+
 		ITemplateSource templateSource = new FileTemplateSource(
 				repositoryPath + "/DirectoryExtenderEngineUTest/resources", "");
-		
+
 		File srcFolder = new File(repositoryPath + "/DirectoryExtenderEngineUTest/bundles");
 		File destFolder = new File(outPath);
-		
+
 		// Sprawdzenie czy folder źródłowy istnieje
 		if(!srcFolder.exists()) {
 			assert false : "Zasób " + srcFolder + " nie istnieje. Test zostaje przewany.";
@@ -73,9 +74,9 @@ public class DirectoryExtenderEngineUTest extends AbstractTempelEngineTest {
 				//System.out.println("Pliki niezbędne do testu zostały poprawnie skopiowane. "
 				//		+ "Zostaje uruchomiony DirectoryExtenderEngineUTest\n");
 				engine.run(templateSource, modelMap, outPath);
-				
-				//String md5 = Temp.DigestUtils_countDigest("MD5", new File(outPath));
-				//assert "1b88794f97f0b86ceba125ef9326af9e".equals(md5) : md5;
+
+				String md5 = Temp.DigestUtils_countDigest("MD5", new File(outPath));
+				assert "89f753a91575e22c3118d139f7090130".equals(md5) : md5;
 				} catch(IOException e) {
 					e.printStackTrace();
 					assert false : "Pliki niezbędne do testu nie zostały skoiowane.";
@@ -83,19 +84,19 @@ public class DirectoryExtenderEngineUTest extends AbstractTempelEngineTest {
 				}
 		}
 	}
-	
+
 	public static void copyFolder(File src, File dest) throws IOException {
-		
+
 		if(src.isDirectory()) {
 			// Jeśli ścieżka nie istnieje, to zostaje ona utworzona
 			if(!dest.exists()) {
 				dest.mkdir();
 				//System.out.println("Skopiowano folder z " + src + " do " + dest);
 			}
-			
+
 			// Lista wszystkich zaweranych ścieżek
 			String files[] = src.list();
-			
+
 			for(String file : files) {
 				// Tworzenie zródłowej oraz docelowej struktury folderów
 				File srcFile = new File(src, file);
@@ -103,20 +104,20 @@ public class DirectoryExtenderEngineUTest extends AbstractTempelEngineTest {
 				// Kopiowanie rekurencyjne
 				copyFolder(srcFile,destFile);
 			}
-			
+
 		} else {
 			// Jeśli przetwarzany jest plik, to zostaje on skopiowany
 			InputStream in = new FileInputStream(src);
 			OutputStream out = new FileOutputStream(dest); 
-			
+
 			byte[] buffer = new byte[1024];
-			
+
 			int length;
 			// Kopiowanie zawartości pliku 
 			while((length = in.read(buffer)) > 0) {
 				out.write(buffer, 0, length);
 			}
-			
+
 			in.close();
 			out.close();
 			//System.out.println("Skopiowano plik z " + src + " do " + dest);

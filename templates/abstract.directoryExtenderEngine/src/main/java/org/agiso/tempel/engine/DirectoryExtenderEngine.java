@@ -53,23 +53,23 @@ public class DirectoryExtenderEngine extends AbstractVelocityEngine {
 					+ templateSource.getTemplate() + "/" + templateSource.getResource()
 					+ " nie istnieje");
 		}
-		
+
 //		System.out.println("Folder " + templateSource.getTemplate() + "/"+ 
 //				templateSource.getResource() + " istnieje. Target: " + target);
-		
+
 		try {
 			processVelocityResource(templateSource, params, target);
 			System.out.println("\nStruktura modyfikowanych plików odpowiada stukturze szablonu");
-			
+
 			for(String tabDirs[] : listFilesToProces) {
 				System.out.println("Modyfikowanie pliku ..." + tabDirs[2].substring(tabDirs[2].length() - 35) + 
 						" zgodnie z plikiem: ..." + (tabDirs[0] + tabDirs[1]).substring(tabDirs[0].length() + tabDirs[1].length() - 35));
 				ITemplateSource fileExtTempSource = new FileTemplateSource(tabDirs[0], tabDirs[1]);
 				fileExtEngine.run(fileExtTempSource, params, tabDirs[2]);
 			}
-			
+
 			System.out.println("Operacje na plikach zakończone powodzeniem\n");
-			
+
 		} catch(Exception e) {
 			throw new RuntimeException(e);
 		}
@@ -81,10 +81,10 @@ public class DirectoryExtenderEngine extends AbstractVelocityEngine {
 	 * są wszsytkie jego wpisy.
 	 */
 	protected void processVelocityResource(ITemplateSource source, Map<String, Object> params, String target) throws Exception {
-		
+
 		for(ITemplateSourceEntry entry : source.listEntries()) {
 			//System.out.println("Wykryto zasób: " + entry.getName());
-			
+
 			if(entry.isFile()) {
 //				System.out.println("Element " + entry.getTemplate() + "/" + source.getResource() +
 //						"/"+ entry.getName() + " jest plikiem");
@@ -97,7 +97,7 @@ public class DirectoryExtenderEngine extends AbstractVelocityEngine {
 		// Tworzenie kontekstu Velocity
 		VelocityContext context = createVelocityContext(params);
 		String fullTargetPath = entry.getName();
-		
+
 		if(fullTargetPath.endsWith(TEMPLATE_FILE_SUFFIX)) {
 			// Ustalanie pełnej ściezki dla pliku vm
 			String resourcePath = entry.getTemplate() + "/" + resFolder + "/"+ fullTargetPath.substring(0, fullTargetPath.lastIndexOf('/') + 1);
@@ -108,17 +108,17 @@ public class DirectoryExtenderEngine extends AbstractVelocityEngine {
 			// Sprawdzenie czy obie ścieżki są poprawne 
 			File fileRes = new File(resourcePath + resourceFile);
 			File fileTarg = new File(fullTargetPath);
-			
+
 			if(!fileRes.exists()) {
 				throw new RuntimeException("Ścieżka do pliku .vm: " + fileRes.toPath()
 						+ ", będąca parametrem FileExtenderEngine'a jest nieprawidłowa");
 			}
-			
+
 			if(!fileTarg.exists()) {
 				throw new RuntimeException("Ścieżka modyfikowanego pliku: " + fileTarg.toPath()
 						+ ", będąca parametrem FileExtenderEngine'a jest nieprawidłowa");
 			}
-			
+
 			//System.out.println("Obie ścieżki są prawidłowe");
 			String tabDirs[] = new String[3];
 			tabDirs[0] = resourcePath;
