@@ -3,13 +3,13 @@
  * Tempel.java
  * 
  * Copyright 2012 agiso.org
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -29,6 +29,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.TreeMap;
 
+import org.agiso.core.logging.Logger;
+import org.agiso.core.logging.util.LogUtils;
 import org.agiso.tempel.api.internal.IExpressionEvaluator;
 import org.agiso.tempel.api.internal.IParamReader;
 import org.agiso.tempel.api.internal.ITemplateExecutor;
@@ -39,9 +41,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 /**
  * 
  * 
- * @author <a href="mailto:kkopacz@agiso.org">Karol Kopacz</a>
+ * @author Karol Kopacz
+ * @since 1.0
  */
 public class Tempel implements ITempel {
+	private static final Logger logger = LogUtils.getLogger(Tempel.class);
+
 	private final Map<String, Object> systemProperties;
 
 //	--------------------------------------------------------------------------
@@ -110,7 +115,9 @@ public class Tempel implements ITempel {
 				String oldValue = (String)value;
 				String newValue = expressionEvaluator.evaluate(oldValue, properties);
 				if(!oldValue.equals(newValue)) {
-					System.out.println(oldValue + " --> " + newValue);
+					logger.debug("Property {}: {} <-- {}",
+							key, oldValue, newValue
+					);
 					properties.put(key, newValue);
 				}
 			}

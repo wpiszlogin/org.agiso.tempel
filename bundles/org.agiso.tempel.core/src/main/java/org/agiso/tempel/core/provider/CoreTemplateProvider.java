@@ -3,13 +3,13 @@
  * CoreTemplateProvider.java
  * 
  * Copyright 2012 agiso.org
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,6 +18,9 @@
  */
 package org.agiso.tempel.core.provider;
 
+import static org.agiso.tempel.Temp.AnsiUtils.*;
+import static org.agiso.tempel.Temp.AnsiUtils.AnsiElement.*;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -25,6 +28,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
+import org.agiso.core.logging.Logger;
+import org.agiso.core.logging.util.LogUtils;
 import org.agiso.tempel.api.internal.ITemplateProvider;
 import org.agiso.tempel.api.internal.ITemplateProviderElement;
 import org.agiso.tempel.api.model.Template;
@@ -34,10 +39,13 @@ import org.springframework.stereotype.Component;
 /**
  * 
  * 
- * @author <a href="mailto:kkopacz@agiso.org">Karol Kopacz</a>
+ * @author Karol Kopacz
+ * @since 1.0
  */
 @Component
 public class CoreTemplateProvider implements ITemplateProvider {
+	private static final Logger logger = LogUtils.getLogger(CoreTemplateProvider.class);
+
 	@SuppressWarnings("unchecked")
 	private List<ITemplateProviderElement> elements = Collections.EMPTY_LIST;
 
@@ -55,7 +63,10 @@ public class CoreTemplateProvider implements ITemplateProvider {
 		});
 
 		for(ITemplateProviderElement provider : elements) {
-			System.out.println(provider.getOrder() + ": " + provider.getClass().getSimpleName());
+			logger.debug("Setting up template provider {} with order {}",
+					ansiString(GREEN, provider.getClass().getSimpleName()),
+					ansiString(GREEN, provider.getOrder())
+			);
 		}
 	}
 
@@ -64,7 +75,10 @@ public class CoreTemplateProvider implements ITemplateProvider {
 	public void initialize(Map<String, Object> properties) throws IOException {
 		for(int index = elements.size() - 1; index >= 0; index--) {
 			ITemplateProviderElement provider = elements.get(index);
-			System.out.println(provider.getOrder() + " initialize: " + provider.getClass().getSimpleName());
+			logger.trace("Initializing template provider {} with order {}",
+					ansiString(GREEN, provider.getClass().getSimpleName()),
+					ansiString(GREEN, provider.getOrder())
+			);
 			Map<String, String> providerProperties = provider.initialize();
 			if(providerProperties != null) {
 				properties.putAll(providerProperties);
@@ -76,7 +90,10 @@ public class CoreTemplateProvider implements ITemplateProvider {
 	@Override
 	public void configure(Map<String, Object> properties) throws IOException {
 		for(ITemplateProviderElement provider : elements) {
-			System.out.println(provider.getOrder() + " configure: " + provider.getClass().getSimpleName());
+			logger.trace("Configuring template provider {} with order {}",
+					ansiString(GREEN, provider.getClass().getSimpleName()),
+					ansiString(GREEN, provider.getOrder())
+			);
 			provider.configure(properties);
 		}
 	}

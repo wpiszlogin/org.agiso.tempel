@@ -44,7 +44,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.agiso.tempel</groupId>
-			<artifactId>org.agiso.tempel.support.file</artifactId>
+			<artifactId>org.agiso.tempel.support.maven</artifactId>
 			<scope>test</scope>
 		</dependency>
 

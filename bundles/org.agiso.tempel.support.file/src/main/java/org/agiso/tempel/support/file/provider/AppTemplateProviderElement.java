@@ -3,13 +3,13 @@
  * AppTemplateProviderElement.java
  * 
  * Copyright 2012 agiso.org
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,6 +18,9 @@
  */
 package org.agiso.tempel.support.file.provider;
 
+import static org.agiso.tempel.Temp.AnsiUtils.*;
+import static org.agiso.tempel.Temp.AnsiUtils.AnsiElement.*;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
@@ -25,11 +28,14 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.agiso.core.logging.Logger;
+import org.agiso.core.logging.util.LogUtils;
 import org.agiso.tempel.Temp;
 import org.agiso.tempel.api.ITemplateRepository;
 import org.agiso.tempel.api.ITemplateSource;
 import org.agiso.tempel.api.ITemplateSourceFactory;
 import org.agiso.tempel.api.impl.FileTemplateSource;
+import org.agiso.tempel.api.impl.NullTemplateSource;
 import org.agiso.tempel.api.internal.ITempelEntryProcessor;
 import org.agiso.tempel.api.model.Template;
 import org.agiso.tempel.support.base.provider.BaseTemplateProviderElement;
@@ -39,10 +45,13 @@ import org.springframework.stereotype.Component;
 /**
  * 
  * 
- * @author <a href="mailto:kkopacz@agiso.org">Karol Kopacz</a>
+ * @author Karol Kopacz
+ * @since 1.0
  */
 @Component
 public class AppTemplateProviderElement extends BaseTemplateProviderElement {
+	private static final Logger logger = LogUtils.getLogger(RunTemplateProviderElement.class);
+
 	private boolean initialized;
 	private String settingsPath;
 	private String librariesPath;
@@ -70,7 +79,7 @@ public class AppTemplateProviderElement extends BaseTemplateProviderElement {
 		// Inicjalizacja repozytoriów z zasobami dla poszczególnych poziomów:
 		if(index != -1) {
 			// Rzeczywiste środowisko uruchomieniowe (uruchomienie z linni komend):
-			settingsPath = path.substring(0, index) + "/templates/tempel.xml";
+			settingsPath = path.substring(0, index) + "/conf/tempel.xml";
 			librariesPath = path.substring(0, index) + "/templates/lib";
 			repositoryPath = path.substring(0, index) + "/templates/repo";
 		} else {
@@ -119,8 +128,11 @@ public class AppTemplateProviderElement extends BaseTemplateProviderElement {
 							templateRepository, new ITemplateSourceFactory() {
 								@Override
 								public ITemplateSource createTemplateSource(Template<?> template, String source) {
-									try {
-										return new FileTemplateSource(getTemplatePath(template), source);
+									String templatePath = getTemplatePath(template);
+									if(templatePath == null) {
+										return new NullTemplateSource();
+									} else try {
+										return new FileTemplateSource(templatePath, source);
 									} catch(IOException e) {
 										throw new RuntimeException(e);
 									}
@@ -129,11 +141,17 @@ public class AppTemplateProviderElement extends BaseTemplateProviderElement {
 					);
 				}
 			});
-			System.out.println("Wczytano ustawienia globalne z pliku " + appSettingsFile.getCanonicalPath());
+
+			logger.debug("Application {} file processed successfully",
+					ansiString(GREEN, appSettingsFile.getCanonicalPath())
+			);
 
 			return true;
 		} catch(Exception e) {
-			System.err.println("Błąd wczytywania ustawień globalnych: " + e.getMessage());
+			logger.error(e, "Error processing application {} file: {}",
+					ansiString(GREEN, appSettingsFile.getCanonicalPath()),
+					ansiString(RED, e.getMessage())
+			);
 			throw new RuntimeException(e);
 		}
 		return false;
@@ -141,7 +159,8 @@ public class AppTemplateProviderElement extends BaseTemplateProviderElement {
 
 	private String getTemplatePath(Template<?> template) {
 		if(Temp.StringUtils_isEmpty(template.getGroupId())) {
-			throw new RuntimeException("Szablon GLOBAL bez groupId");
+//			throw new RuntimeException("Szablon GLOBAL bez groupId");
+			return null;
 		}
 
 		String path = repositoryPath;

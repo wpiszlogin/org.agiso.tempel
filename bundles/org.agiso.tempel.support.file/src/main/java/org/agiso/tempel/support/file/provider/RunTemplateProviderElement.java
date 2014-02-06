@@ -3,13 +3,13 @@
  * RunTemplateProviderElement.java
  * 
  * Copyright 2012 agiso.org
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,6 +18,9 @@
  */
 package org.agiso.tempel.support.file.provider;
 
+import static org.agiso.tempel.Temp.AnsiUtils.*;
+import static org.agiso.tempel.Temp.AnsiUtils.AnsiElement.*;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
@@ -25,11 +28,14 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.agiso.core.logging.Logger;
+import org.agiso.core.logging.util.LogUtils;
 import org.agiso.tempel.Temp;
 import org.agiso.tempel.api.ITemplateRepository;
 import org.agiso.tempel.api.ITemplateSource;
 import org.agiso.tempel.api.ITemplateSourceFactory;
 import org.agiso.tempel.api.impl.FileTemplateSource;
+import org.agiso.tempel.api.impl.NullTemplateSource;
 import org.agiso.tempel.api.internal.ITempelEntryProcessor;
 import org.agiso.tempel.api.model.Template;
 import org.agiso.tempel.support.base.provider.BaseTemplateProviderElement;
@@ -39,10 +45,13 @@ import org.springframework.stereotype.Component;
 /**
  * 
  * 
- * @author <a href="mailto:kkopacz@agiso.org">Karol Kopacz</a>
+ * @author Karol Kopacz
+ * @since 1.0
  */
 @Component
 public class RunTemplateProviderElement extends BaseTemplateProviderElement {
+	private static final Logger logger = LogUtils.getLogger(RunTemplateProviderElement.class);
+
 	private boolean initialized;
 	private String settingsPath;
 	private String librariesPath;
@@ -122,13 +131,11 @@ public class RunTemplateProviderElement extends BaseTemplateProviderElement {
 							templateRepository, new ITemplateSourceFactory() {
 								@Override
 								public ITemplateSource createTemplateSource(Template<?> template, String source) {
-									try {
-										// TODO: Dla szablonów lokalnych nie posiadających własnych zasobów
-										// można rozważyć dopuszczenie braku elementów groupId, templateId i version
-										// w ich definicji i wywoływanie tylko z wykorzystaniem STN. W takiej sytuacji
-										// getTemplatePath(template) zwraca wartość null i trzeba przygotować osobną
-										// implementację interfejsu ITemplateSource (np. NullTemplateSource).
-										return new FileTemplateSource(getTemplatePath(template), source);
+									String templatePath = getTemplatePath(template);
+									if(templatePath == null) {
+										return new NullTemplateSource();
+									} else try {
+										return new FileTemplateSource(templatePath, source);
 									} catch(IOException e) {
 										throw new RuntimeException(e);
 									}
@@ -137,11 +144,17 @@ public class RunTemplateProviderElement extends BaseTemplateProviderElement {
 					);
 				}
 			});
-			System.out.println("Wczytano ustawienia lokalne z pliku " + runSettingsFile.getCanonicalPath());
+
+			logger.debug("Local {} file processed successfully",
+					ansiString(GREEN, runSettingsFile.getCanonicalPath())
+			);
 
 			return true;
 		} catch(Exception e) {
-			System.err.println("Błąd wczytywania ustawień lokalnych: " + e.getMessage());
+			logger.error(e, "Error processing local {} file: {}",
+					ansiString(GREEN, runSettingsFile.getCanonicalPath()),
+					ansiString(RED, e.getMessage())
+			);
 			throw new RuntimeException(e);
 		}
 		return false;

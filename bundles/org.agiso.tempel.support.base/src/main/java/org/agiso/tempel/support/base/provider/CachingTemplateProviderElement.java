@@ -3,13 +3,13 @@
  * CachingTemplateProviderElement.java
  * 
  * Copyright 2013 agiso.org
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,10 +18,15 @@
  */
 package org.agiso.tempel.support.base.provider;
 
+import static org.agiso.tempel.Temp.AnsiUtils.*;
+import static org.agiso.tempel.Temp.AnsiUtils.AnsiElement.*;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import org.agiso.core.logging.Logger;
+import org.agiso.core.logging.util.LogUtils;
 import org.agiso.tempel.api.ITemplateRepository;
 import org.agiso.tempel.api.ITemplateSourceFactory;
 import org.agiso.tempel.api.internal.ITempelEntryProcessor;
@@ -31,9 +36,12 @@ import org.agiso.tempel.support.base.repository.HashBasedTemplateRepository;
 /**
  * 
  * 
- * @author <a href="mailto:kkopacz@agiso.org">Karol Kopacz</a>
+ * @author Karol Kopacz
+ * @since 1.0
  */
 public abstract class CachingTemplateProviderElement extends BaseTemplateProviderElement implements ITemplateSourceFactory {
+	private static final Logger logger = LogUtils.getLogger(CachingTemplateProviderElement.class);
+
 	private final Map<String, CacheEntry> cache = new HashMap<String, CacheEntry>();
 
 //	--------------------------------------------------------------------------
@@ -68,9 +76,14 @@ public abstract class CachingTemplateProviderElement extends BaseTemplateProvide
 						);
 					}
 				});
-				System.out.println("Wczytano ustawienia z biblioteki szablonu " + key);
+				logger.debug("Template {} definition processed successfully",
+						ansiString(GREEN, key)
+				);
 			} catch(Exception e) {
-				System.err.println("Błąd wczytywania ustawień z biblioteki szablonu '" + key + "': " + e.getMessage());
+				logger.error(e, "Error processing template {} definition: {}",
+						ansiString(GREEN, key),
+						ansiString(RED, e.getMessage())
+				);
 				throw new RuntimeException(e);
 			}
 

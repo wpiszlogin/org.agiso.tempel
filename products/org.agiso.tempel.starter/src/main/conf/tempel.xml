@@ -1,3 +1,87 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <tempel xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<!--
+	  - Tworzy w katalogu roboczym folder o nazwie przekazanej przez
+	  - parametr 'name'
+	  -->
+	<template key="mkdir">
+		<params>
+			<param key="name" name="Directory name" />
+		</params>
+
+		<references>
+			<reference>
+				<groupId>org.agiso.tempel.templates</groupId>
+				<templateId>abstract.mkdir</templateId>
+				<version>1.0.0</version>
+
+				<resource>
+					<target>${top.name}</target>
+				</resource>
+			</reference>
+		</references>
+	</template>
+
+	<!--
+	  - Tworzy w katalogu roboczym ścieżkę folderów o nazwach przekazanych
+	  - przez parametr 'path'
+	  -->
+	<template key="mkdirs">
+		<params>
+			<param key="path" name="Directory path name" />
+		</params>
+
+		<references>
+			<reference>
+				<groupId>org.agiso.tempel.templates</groupId>
+				<templateId>abstract.mkdirs</templateId>
+				<version>1.0.0</version>
+
+				<resource>
+					<target>${top.path}</target>
+				</resource>
+			</reference>
+		</references>
+	</template>
+
+	<!--
+	  - Tworzy w katalogu roboczym lokalne repozytorium szablonów Tempel
+	  -->
+	<template key="addLocalTempel">
+		<references>
+			<reference>
+				<groupId>org.agiso.tempel.templates</groupId>
+				<templateId>tempel.add</templateId>
+				<version>1.0.0</version>
+			</reference>
+		</references>
+	</template>
+
+	<!--
+	  - Dodaje w lokalnym repozytorium szablonów Tempel wskazanym przez
+	  - katalog roboczy szkielet nowego szablonu.
+	  -->
+	<template key="addLocalTemplate">
+		<references>
+			<reference>
+				<groupId>org.agiso.tempel.templates</groupId>
+				<templateId>template.add.local</templateId>
+				<version>1.0.0</version>
+			</reference>
+		</references>
+	</template>
+
+	<!--
+	  - Tworzy w katalogu roboczym projekt szablonu Tempel, który może być
+	  - umieszczany w repozytorium ApacheMaven.
+	  -->
+	<template key="addMavenTemplate">
+		<references>
+			<reference>
+				<groupId>org.agiso.tempel.templates</groupId>
+				<templateId>template.add.maven</templateId>
+				<version>1.0.0</version>
+			</reference>
+		</references>
+	</template>
 </tempel>

@@ -14,11 +14,8 @@
 	<name>AGISO Tempel POM</name>
 	<url>http://agiso.org/tempel</url>
 	<inceptionYear>2012</inceptionYear>
+	<description>Tool for generation resources based on templates.</description>
 
-	<organization>
-		<name>agiso.org</name>
-		<url>http://agiso.org</url>
-	</organization>
 	<licenses>
 		<license>
 			<name>The Apache Software License, Version 2.0</name>
@@ -26,11 +23,51 @@
 		</license>
 	</licenses>
 
+	<organization>
+		<name>agiso.org</name>
+		<url>http://agiso.org</url>
+	</organization>
+
+	<developers>
+		<developer>
+			<id>kkopacz</id>
+			<name>Karol Kopacz</name>
+			<email>kkopacz@agiso.org</email>
+			<roles>
+				<role>developer</role>
+			</roles>
+			<timezone>1</timezone>
+		</developer>
+	</developers>
+
 	<scm>
 		<connection>scm:git:git@github.com:kkopacz/org.agiso.tempel.git</connection>
-		<url>scm:git:git@github.com:kkopacz/org.agiso.tempel.git</url>
 		<developerConnection>scm:git:git@github.com:kkopacz/org.agiso.tempel.git</developerConnection>
+		<url>git@github.com:kkopacz/org.agiso.tempel.git</url>
 	</scm>
+
+	<!-- distributionManagement>
+		<repository>
+			<id>agiso-releases</id>
+			<url>http://repo.agiso.org/content/repositories/releases</url>
+		</repository>
+		<snapshotRepository>
+			<id>agiso-snapshots</id>
+			<url>http://repo.agiso.org/content/repositories/snapshots</url>
+		</snapshotRepository>
+	</distributionManagement -->
+	<distributionManagement>
+		<repository>
+			<id>sonatype-nexus-staging</id>
+			<name>Sonatype Nexus release repository</name>
+			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+		</repository>
+		<snapshotRepository>
+			<id>sonatype-nexus-snapshots</id>
+			<name>Sonatype Nexus snapshot repository</name>
+			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+		</snapshotRepository>
+	</distributionManagement>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -39,34 +76,42 @@
 		<maven-compiler-plugin.version>3.0</maven-compiler-plugin.version>
 		<maven-resources-plugin.version>2.6</maven-resources-plugin.version>
 		<maven-release-plugin.version>2.4.1</maven-release-plugin.version>
+		<appassembler-plugin.version>1.1.1</appassembler-plugin.version>
 
 		<!-- agiso.org Tempel dependencies -->
 		<tempel.version>0.0.1-SNAPSHOT</tempel.version>
 		<tempel.templates.version>1.0.0</tempel.templates.version>
 
+		<!-- agiso.core dependencies -->
+		<agiso.core.version><!--org.agiso.core-->0.0.1.BUILD-SNAPSHOT</agiso.core.version>
+
 		<!-- Apache Commons dependencies -->
 		<commons-cli.version>1.2</commons-cli.version>
 
 		<!-- Spring Framework dependencies -->
-		<spring.version>3.2.4.RELEASE</spring.version>
+		<spring.version>4.0.0.RELEASE</spring.version>
+		<spring.boot.version>1.0.0.RC1</spring.boot.version>
 
 		<!-- ShrinkWrap dependencies -->
-		<shrinkwrap.version>1.0.1</shrinkwrap.version>
-		<shrinkwrap-resolver.version>2.0.1</shrinkwrap-resolver.version>
+		<shrinkwrap.version>1.2.1</shrinkwrap.version>
+		<shrinkwrap-resolver.version>2.0.2</shrinkwrap-resolver.version>
 
 		<!-- Maven, Aether & Wagon dependencies -->
 		<aether.version>1.13.1</aether.version>
 		<maven.version>3.0.5</maven.version>
-		<wagon.version>2.4</wagon.version>
+		<wagon.version>2.6</wagon.version>
 
 		<!-- Other dependencies -->
-		<xstream.version>1.4.3</xstream.version>
+		<xstream.version>1.4.6</xstream.version>
 		<velocity.version>1.7</velocity.version>
 		<inflector.version>0.7.0</inflector.version>
-		<guava.version>13.0.1</guava.version>
+		<guava.version>16.0</guava.version>
+
+		<!-- Logging dependencies -->
+		<slf4j.version>1.7.5</slf4j.version>
 
 		<!-- Test dependencies -->
-		<testng.version>6.7</testng.version>
+		<testng.version>6.8.7</testng.version>
 		<mockito.version>1.9.5</mockito.version>
 	</properties>
 
@@ -122,12 +167,15 @@
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-release-plugin</artifactId>
 					<version>${maven-release-plugin.version}</version>
+					<configuration>
+						<arguments>-Dgpg.passphrase=${gpg.passphrase}</arguments>
+					</configuration>
 				</plugin>
 
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>appassembler-maven-plugin</artifactId>
-					<version>1.1.1</version>
+					<version>${appassembler-plugin.version}</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>
@@ -237,6 +285,18 @@
 				<groupId>org.springframework</groupId>
 				<artifactId>spring-context</artifactId>
 				<version>${spring.version}</version>
+				<exclusions>
+					<!-- Starters use SLF4J -->
+					<exclusion>
+						<groupId>commons-logging</groupId>
+						<artifactId>commons-logging</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-starter</artifactId>
+				<version>${spring.boot.version}</version>
 			</dependency>
 
 			<!-- Maven, Aether & Wagon dependencies -->
@@ -287,16 +347,16 @@
 				<artifactId>wagon-http-lightweight</artifactId>
 				<version>${wagon.version}</version>
 			</dependency>
-			<!-- dependency>
+			<dependency>
 				<groupId>org.apache.maven.wagon</groupId>
 				<artifactId>wagon-http</artifactId>
 				<version>${wagon.version}</version>
-			</dependency -->
-			<!-- dependency>
+			</dependency>
+			<dependency>
 				<groupId>org.apache.maven.wagon</groupId>
 				<artifactId>wagon-ssh</artifactId>
 				<version>${wagon.version}</version>
-			</dependency -->
+			</dependency>
 
 			<!-- Other dependencies -->
 			<dependency>
@@ -340,7 +400,25 @@
 				<version>${shrinkwrap-resolver.version}</version>
 			</dependency>
 
+			<!-- Logging dependencies -->
+			<dependency>
+				<groupId>org.agiso.core</groupId>
+				<artifactId>agiso-core-logging</artifactId>
+				<version>${agiso.core.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>jcl-over-slf4j</artifactId>
+				<version>${slf4j.version}</version>
+			</dependency>
+
 			<!-- Test dependencies -->
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-starter-test</artifactId>
+				<version>${spring.boot.version}</version>
+				<scope>test</scope>
+			</dependency>
 			<dependency>
 				<groupId>org.testng</groupId>
 				<artifactId>testng</artifactId>
@@ -353,4 +431,50 @@
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
+
+	<dependencies>
+		<!-- Logging dependencies -->
+		<dependency>
+			<groupId>org.agiso.core</groupId>
+			<artifactId>agiso-core-logging</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>jcl-over-slf4j</artifactId>
+		</dependency>
+	</dependencies>
+
+	<profiles>
+		<profile>
+			<id>release-sign-artifacts</id>
+			<activation>
+				<property>
+					<name>performRelease</name>
+					<value>true</value>
+				</property>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-gpg-plugin</artifactId>
+						<version>1.4</version>
+						<configuration>
+							<keyname>kkopacz@agiso.org</keyname>
+							<passphrase>${gpg.passphrase}</passphrase>
+						</configuration>
+						<executions>
+							<execution>
+								<id>sign-artifacts</id>
+								<phase>verify</phase>
+								<goals>
+									<goal>sign</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 </project>

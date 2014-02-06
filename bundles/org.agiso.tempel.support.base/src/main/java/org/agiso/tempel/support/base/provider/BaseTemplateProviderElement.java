@@ -3,13 +3,13 @@
  * BaseTemplateProviderElement.java
  * 
  * Copyright 2012 agiso.org
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -36,7 +36,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 /**
  * 
  * 
- * @author <a href="mailto:kkopacz@agiso.org">Karol Kopacz</a>
+ * @author Karol Kopacz
+ * @since 1.0
  */
 public abstract class BaseTemplateProviderElement implements ITemplateProviderElement {
 	private boolean active;
@@ -124,7 +125,9 @@ public abstract class BaseTemplateProviderElement implements ITemplateProviderEl
 			String gId = Temp.StringUtils_emptyIfBlank(template.getGroupId());
 			String tId = Temp.StringUtils_emptyIfBlank(template.getTemplateId());
 			String ver = Temp.StringUtils_emptyIfBlank(template.getVersion());
-			templateRepository.put(null, gId, tId, ver, template);
+			if(!Temp.StringUtils_isBlank(gId)) {
+				templateRepository.put(null, gId, tId, ver, template);
+			}
 
 			String key = template.getKey();
 			if(!Temp.StringUtils_isBlank(key)) {
