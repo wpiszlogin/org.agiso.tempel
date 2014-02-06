@@ -19,11 +19,7 @@
 package org.agiso.tempel.engine;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -76,13 +72,13 @@ public class DirectoryExtenderEngineUTest extends AbstractTempelEngineTest {
 			assert false : "Zasób " + srcFolder + " nie istnieje. Test zostaje przewany.";
 		} else {
 			try {
-				copyFolder(srcFolder, destFolder);
+				Temp.FileUtils_copyFolder(srcFolder, destFolder);
 				//System.out.println("Pliki niezbędne do testu zostały poprawnie skopiowane. "
 				//		+ "Zostaje uruchomiony DirectoryExtenderEngineUTest\n");
 				engine.run(templateSource, modelMap, outPath);
 
 				String md5 = Temp.DigestUtils_countDigest("MD5", new File(outPath));
-				assert "89f753a91575e22c3118d139f7090130".equals(md5) : md5;
+				assert "a43d6d8d9c7693a5868b22316ddd731d".equals(md5) : md5;
 				} catch(IOException e) {
 					e.printStackTrace();
 					assert false : "Pliki niezbędne do testu nie zostały skoiowane.";
@@ -91,42 +87,4 @@ public class DirectoryExtenderEngineUTest extends AbstractTempelEngineTest {
 		}
 	}
 
-	public static void copyFolder(File src, File dest) throws IOException {
-
-		if(src.isDirectory()) {
-			// Jeśli ścieżka nie istnieje, to zostaje ona utworzona
-			if(!dest.exists()) {
-				dest.mkdir();
-				//System.out.println("Skopiowano folder z " + src + " do " + dest);
-			}
-
-			// Lista wszystkich zaweranych ścieżek
-			String files[] = src.list();
-
-			for(String file : files) {
-				// Tworzenie zródłowej oraz docelowej struktury folderów
-				File srcFile = new File(src, file);
-				File destFile = new File(dest, file);
-				// Kopiowanie rekurencyjne
-				copyFolder(srcFile,destFile);
-			}
-
-		} else {
-			// Jeśli przetwarzany jest plik, to zostaje on skopiowany
-			InputStream in = new FileInputStream(src);
-			OutputStream out = new FileOutputStream(dest); 
-
-			byte[] buffer = new byte[1024];
-
-			int length;
-			// Kopiowanie zawartości pliku 
-			while((length = in.read(buffer)) > 0) {
-				out.write(buffer, 0, length);
-			}
-
-			in.close();
-			out.close();
-			//System.out.println("Skopiowano plik z " + src + " do " + dest);
-		}
-	}
 }

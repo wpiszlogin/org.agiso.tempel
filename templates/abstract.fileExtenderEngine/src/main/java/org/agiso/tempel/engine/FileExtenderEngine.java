@@ -18,13 +18,13 @@
  */
 package org.agiso.tempel.engine;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -43,30 +43,21 @@ import org.apache.velocity.app.VelocityEngine;
 public class FileExtenderEngine implements ITempelEngine {
 	@Override
 	public void run(ITemplateSource source, Map<String, Object> params, String target) {
+		BufferedReader buffRead = null;
 
 		try {
-			File fileSource = new File(source.getTemplate() + "/" + source.getResource());
 			//System.out.println("Otwieranie pliku template " + source.getTemplate() + "/"+ source.getResource());
-			String fileContent = new String(Files.readAllBytes(fileSource.toPath()));
-			int srcInd = 0;
-			int nlInd = 0;
-			int srcEndInd = fileContent.length();
+			//String fileContent = new String(Files.readAllBytes(fileSource.toPath()));
+
 			String line = "", multiLine = "", tag = "";
-			boolean foundTag = false;
+			boolean foundTag = false;			
+			buffRead = new BufferedReader(new FileReader(source.getTemplate() + "/" + source.getResource()));
+			
 			List<String> listAdd = new ArrayList<String>();
 			VelocityContext context = createVelocityContext(params);
 
 			// Wczytywanie linii
-			while(nlInd != -1) {
-				nlInd = fileContent.indexOf('\n', srcInd); // Indeks znalezionej frazy
-				if(nlInd != -1) {
-					line = fileContent.substring(srcInd, nlInd);
-					srcInd = nlInd + 1;
-				}
-				else {
-					line = fileContent.substring(srcInd, srcEndInd);
-				}
-
+			while((line = buffRead.readLine()) != null) {
 				//System.out.println("add line " + line + " długość " + line.length());
 
 				// Wykrywanie znacznikow
@@ -96,9 +87,14 @@ public class FileExtenderEngine implements ITempelEngine {
 					}
 				}
 			}
+
+			if(buffRead != null) {
+				buffRead.close();
+			}
 		} catch(IOException e) {
 			throw new RuntimeException("Wystąpił błąd podczas próby edycji pliku");
 		}
+
 	}
 
 	public VelocityContext createVelocityContext(Map<String, Object> params) {
@@ -119,14 +115,37 @@ public class FileExtenderEngine implements ITempelEngine {
 	public void procesFile(String strFind, List<String> listPut, String target) throws IOException {
 
 		// Zmienne związane z plikami
-		File fileTarget = new File(target);
-		String fileContent = new String(Files.readAllBytes(fileTarget.toPath()));
-		FileWriter fileModified = new FileWriter(target, false);
+		BufferedReader buffRead = null;
 		BufferedWriter buffModified = null;
+		String fileContent = "";
 
 		try {
 			// Otwieranie pliku, do którego będzie zapisywana zmodyfikowana zawartość
-			buffModified = new BufferedWriter(fileModified);
+			buffRead = new BufferedReader(new FileReader(target));
+			String line = null;
+			String ls = System.getProperty("line.separator");
+			StringBuilder stringBuilder = new StringBuilder();
+			boolean firstTime = true;
+
+			// Tworzenie łańcucha znakowego z zawartością pliku
+			while((line = buffRead.readLine()) != null) {
+				if(firstTime == false) {
+					stringBuilder.append(ls);
+				}
+				else {
+					firstTime = false;
+				}
+
+				stringBuilder.append(line);
+			}
+
+			fileContent = stringBuilder.toString();
+
+			if(buffRead != null) {
+				buffRead.close();
+			}
+
+			buffModified = new BufferedWriter(new FileWriter(target));
 
 			// Zmienne pomicnicze
 			int findInd = 0, commentInd = 0, newLineInd = 0, begInd = 0;
